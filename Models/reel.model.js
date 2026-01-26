@@ -41,4 +41,4 @@ const reelSchima=new mongoose.Schema({
 
 },{timestamps:true})
 const Reel=mongoose.model('Reel',reelSchima)
-export default Reel;
+module.exports=Reel

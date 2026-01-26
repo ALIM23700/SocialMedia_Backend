@@ -41,4 +41,4 @@ const postSchima=new mongoose.Schema({
 
 },{timestamps:true})
 const Post=mongoose.model('Post',postSchima)
-export default Post;
+module.exports=Post

@@ -1,8 +1,10 @@
-import User from "../Models/user.model.js"
-import bcrypt from "bcryptjs"
-import jwt from "jsonwebtoken"
 
-export const registerUser = async (req, res) => {
+const User = require("../Models/user.model")
+const bcrypt = require("bcryptjs")
+const jwt = require("jsonwebtoken")
+
+
+const registerUser = async (req, res) => {
   const { username, email, password } = req.body
 
   try {
@@ -31,11 +33,12 @@ export const registerUser = async (req, res) => {
       user: rest
     })
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: "server error" })
   }
 }
 
-export const loginUser = async (req, res) => {
+const loginUser = async (req, res) => {
   const { email, password } = req.body
 
   try {
@@ -68,8 +71,7 @@ export const loginUser = async (req, res) => {
 
     const { password: pass, ...rest } = user._doc
 
-    res
-      .status(200)
+    res.status(200)
       .cookie("token", token, options)
       .json({
         success: true,
@@ -77,11 +79,13 @@ export const loginUser = async (req, res) => {
         user: rest
       })
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: "error with login" })
   }
 }
 
-export const logoutUser = async (req, res) => {
+
+const logoutUser = async (req, res) => {
   try {
     const options = {
       httpOnly: true,
@@ -97,18 +101,44 @@ export const logoutUser = async (req, res) => {
         message: "logout successfully"
       })
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: "logout error" })
   }
 }
 
-export const profileUser = async (req, res) => {
+
+const profileUser = async (req, res) => {
   res.status(200).json({
     success: true,
     user: req.user
   })
 }
+const uploadProfile = async (req, res) => {
+  try {
+   
+    if (!req.user || !req.user._id) {
+      return res.status(401).json({ message: "unauthorized" });
+    }
 
-export const allUsers = async (req, res) => {
+    
+    if (!req.file) {
+      return res.status(400).json({ message: "no file uploaded" });
+    }
+
+    res.status(200).json({
+      success: true,
+      userId: req.user._id,
+      profileImage: req.file.path,
+      type: req.file.resource_type,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "upload failed" });
+  }
+};
+
+
+const allUsers = async (req, res) => {
   try {
     const users = await User.find().select("-password")
     res.status(200).json({
@@ -116,6 +146,16 @@ export const allUsers = async (req, res) => {
       users
     })
   } catch (error) {
+    console.error(error)
     res.status(500).json({ message: "server error" })
   }
+}
+
+module.exports = {
+  registerUser,
+  loginUser,
+  logoutUser,
+  profileUser,
+ uploadProfile,
+  allUsers
 }

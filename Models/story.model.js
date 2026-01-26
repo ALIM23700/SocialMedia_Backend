@@ -50,4 +50,4 @@ const storySchima=new mongoose.Schema({
 
 },{timestamps:true})
 const Story=mongoose.model('Story',storySchima)
-export default Story;
+module.exports=Story
