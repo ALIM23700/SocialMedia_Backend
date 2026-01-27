@@ -59,13 +59,11 @@ const userSchima=new mongoose.Schema({
     },
     
   ],
-   posts:[
-    {
-        type:mongoose.Schema.Types.ObjectId,
-        ref:"Story"
-    },
-    
-  ]
+  stories: [{
+  type: mongoose.Schema.Types.ObjectId,
+  ref: "Story"
+}]
+
 
 
 }

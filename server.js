@@ -4,7 +4,8 @@ const cookieParser = require("cookie-parser")
 const bodyparser=require("body-parser")
 const cores=require("cors")
 const dotenv=require("dotenv")
-const userrouter = require("./routes/user.route")
+const router1 = require("./routes/user.route")
+const router2 = require("./routes/post.route")
 
 dotenv.config()
 
@@ -24,7 +25,9 @@ app.use(cookieParser())
 
 //routes
 
-app.use("/api/v1/user",userrouter)
+app.use("/api/v1/user",router1)
+
+app.use("/api/v1/user",router2)
 
 app.get("/",(req,res)=>{
     res.send("i am home page")
