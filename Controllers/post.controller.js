@@ -1,18 +1,23 @@
 const Post = require("../Models/post.model");
 const User = require("../Models/user.model");
 
-// Create a new post
+// Create a new post (image/video)
 const createPost = async (req, res) => {
   try {
-    const { mediaType, mediaUrl, caption } = req.body;
-
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "unauthorized" });
     }
 
-    if (!mediaType || !mediaUrl) {
-      return res.status(422).json({ message: "mediaType and mediaUrl are required" });
+    const { caption } = req.body;
+
+    // Check if a file was uploaded
+    if (!req.file) {
+      return res.status(422).json({ message: "media file is required" });
     }
+
+    // Determine media type from file mimetype
+    const mediaUrl = req.file.path; // Cloudinary URL
+    const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
     const post = await Post.create({
       user: req.user._id,
@@ -143,7 +148,7 @@ const commentPost = async (req, res) => {
       return res.status(404).json({ message: "post not found" });
     }
 
-    post.comments.push({ user: req.user._id, text });
+    post.comments.push({ user: req.user._id, text, createAt: new Date() });
     await post.save();
 
     const populatedPost = await Post.findById(req.params.id)

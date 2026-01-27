@@ -1,5 +1,6 @@
 const { Router } = require("express");
 const authMiddleware = require("../Middleware/authMiddleware");
+const upload = require("../Middleware/cloudnaryUpload"); 
 
 const {
   createPost,
