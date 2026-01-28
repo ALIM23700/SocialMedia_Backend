@@ -8,7 +8,7 @@ const router1 = require("./routes/user.route")
 const router2 = require("./routes/post.route")
 const router3 = require("./routes/reel.route")
 const router4 = require("./routes/story.route")
-
+const connectDB=require("../Backend/Models/db.model")
 dotenv.config()
 
 
@@ -17,9 +17,10 @@ dotenv.config()
 const app=express()
 const PORT=process.env.PORT || 3000
 
-
+connectDB()
 //middleware
 app.use(cores())
+
 app.use(bodyparser.urlencoded({extended:false}))
 app.use(bodyparser.json())
 app.use(express.json())
