@@ -7,6 +7,7 @@ const dotenv=require("dotenv")
 const router1 = require("./routes/user.route")
 const router2 = require("./routes/post.route")
 const router3 = require("./routes/reel.route")
+const router4 = require("./routes/story.route")
 
 dotenv.config()
 
@@ -30,6 +31,7 @@ app.use("/api/v1/",router1)
 
 app.use("/api/v1/",router2)
 app.use("/api/v1/",router3)
+app.use("/api/v1/",router4)
 
 app.get("/",(req,res)=>{
     res.send("i am home page")

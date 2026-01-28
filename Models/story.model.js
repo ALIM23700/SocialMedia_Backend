@@ -1,53 +1,60 @@
-const mongoose=require('mongoose')
+const mongoose = require("mongoose");
 
-const storySchima=new mongoose.Schema({
-      user:{
-           type:mongoose.Schema.Types.ObjectId,
-           ref:"User",
-           required:true,
-          },
-      mediaType:{
-           type:String,
-           enum:["image","video"],
-           required:true,
- 
-         },
-         mediaUrl:{
-           type:String,
-           required:true,
- 
-         },
-         viewers:[
-            {
-           type:mongoose.Schema.Types.ObjectId,
-           ref:"User",
-         
-          }],
-       
-        likes:[
-            {
-           type:mongoose.Schema.Types.ObjectId,
-           ref:"User",
-         
-          }],
-        comments:[
-            {
-                 user: {
-           type:mongoose.Schema.Types.ObjectId,
-           ref:"User",
-         },
-         text:String,
-         createAt:Date,
-            }
+const storySchema = new mongoose.Schema(
+  {
+    user: {
+      type: mongoose.Schema.Types.ObjectId,
+      ref: "User",
+      required: true,
+    },
 
-        ],
-        expireAt:{
-            type:Date,
-            default:()=> new Date(Date.now()+24*60*60*1000),
-            expires:0
-        }
-          
+    mediaType: {
+      type: String,
+      enum: ["image", "video"],
+      required: true,
+    },
 
-},{timestamps:true})
-const Story=mongoose.model('Story',storySchima)
-module.exports=Story
+    mediaUrl: {
+      type: String,
+      required: true,
+    },
+
+    viewers: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    likes: [
+      {
+        type: mongoose.Schema.Types.ObjectId,
+        ref: "User",
+      },
+    ],
+
+    comments: [
+      {
+        user: {
+          type: mongoose.Schema.Types.ObjectId,
+          ref: "User",
+        },
+        text: String,
+        createdAt: {
+          type: Date,
+          default: Date.now,
+        },
+      },
+    ],
+
+    expireAt: {
+      type: Date,
+      default: Date.now,
+      expires: "24h", 
+    },
+  },
+  { timestamps: true }
+);
+
+const Story = mongoose.model("Story", storySchema);
+module.exports = Story;
