@@ -11,24 +11,22 @@ const {
   commentPost,
 } = require("../Controllers/post.controller");
 
+
 const router2 = Router();
 
-// Create a new post
-router2.post("/create", authMiddleware, createPost);
 
-// Get all posts
-router2.get("/all", getAllPosts);
+router2.post("/createpost", authMiddleware,upload.single("media"),createPost);
 
-// Get a post by ID
-router2.get("/:id", getPostById);
+router2.get("/allpost",authMiddleware, getAllPosts);
 
-// Update a post (caption only)
-router2.put("/update/:id", authMiddleware, updatePost);
 
-// Like or unlike a post
-router2.put("/like/:id", authMiddleware, likePost);
+router2.get("/post/:id",authMiddleware, getPostById);
 
-// Add a comment to a post
-router2.post("/comment/:id", authMiddleware, commentPost);
+router2.put("/updatepost/:id", authMiddleware, updatePost);
+
+router2.put("/post/like/:id", authMiddleware, likePost);
+
+
+router2.post("/post/comment/:id", authMiddleware, commentPost);
 
 module.exports = router2;

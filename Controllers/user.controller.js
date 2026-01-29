@@ -135,6 +135,7 @@ const uploadProfile = async (req, res) => {
     const userId=req.user?._id;
   try {
     const profileImage=req.file?.path;
+    
    
     if (!req.user || !req.user._id) {
       return res.status(401).json({ message: "unauthorized" });

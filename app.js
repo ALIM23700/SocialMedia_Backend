@@ -20,7 +20,9 @@ connectDB()
 //middleware
 app.use(cores())
 
-app.use(bodyparser.urlencoded({extended:false}))
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
+
 app.use(bodyparser.json())
 app.use(express.json())
 app.use(cookieParser())

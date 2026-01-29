@@ -7,23 +7,16 @@ const {
   getReelById,
   likeReel,
   commentReel,
+  viewReel,
 } = require("../Controllers/reel.controller");
 
 const router3 = Router();
 
-// Create Reel (image/video)
-router3.post("/create", authMiddleware, upload.single("media"), createReel);
-
-// Get all Reels
-router3.get("/", getAllReels);
-
-// Get Reel by ID
-router3.get("/:id", getReelById);
-
-// Like/Unlike Reel
-router3.put("/like/:id", authMiddleware, likeReel);
-
-// Comment on Reel
-router3.post("/comment/:id", authMiddleware, commentReel);
+router3.post("/reel/create", authMiddleware, upload.single("media"), createReel);//ok
+router3.get("/allreel", getAllReels);//ok
+router3.get("/reel/:id", getReelById);//ok
+router3.put("/reel/like/:id", authMiddleware, likeReel);//ok
+router3.post("/reel/comment/:id", authMiddleware, commentReel);//ok
+router3.put("/reel/view/:id", authMiddleware, viewReel);//ok
 
 module.exports = router3;

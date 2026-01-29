@@ -1,7 +1,7 @@
 const Post = require("../Models/post.model");
 const User = require("../Models/user.model");
 
-// Create a new post (image/video)
+
 const createPost = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
@@ -10,21 +10,26 @@ const createPost = async (req, res) => {
 
     const { caption } = req.body;
 
-    // Check if a file was uploaded
     if (!req.file) {
       return res.status(422).json({ message: "media file is required" });
     }
 
-    // Determine media type from file mimetype
-    const mediaUrl = req.file.path; // Cloudinary URL
+ 
+    const mediaUrl = req.file.path; 
     const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
-
+    const userId=req.user._id;
     const post = await Post.create({
-      user: req.user._id,
+      user: userId,
       mediaType,
       mediaUrl,
       caption: caption || "",
     });
+    const user=await User.findById(userId)
+
+    if(user){
+      user?.posts.push(post?._id);
+      await user.save();
+    }
 
     res.status(201).json({
       success: true,
@@ -79,7 +84,8 @@ const getPostById = async (req, res) => {
 // Update a post (caption only)
 const updatePost = async (req, res) => {
   try {
-    const { caption } = req.body;
+    const caption = req.body?.caption;
+
 
     const post = await Post.findById(req.params.id);
     if (!post) {

@@ -13,7 +13,7 @@ const createReel = async (req, res) => {
       return res.status(422).json({ message: "media file is required" });
     }
 
-    const mediaUrl = req.file.path; // Cloudinary URL from multer
+    const mediaUrl = req.file.path;
     const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
     const reel = await Reel.create({
@@ -133,10 +133,36 @@ const commentReel = async (req, res) => {
   }
 };
 
+// View a Reel
+const viewReel = async (req, res) => {
+  try {
+    const reel = await Reel.findById(req.params.id);
+    if (!reel) {
+      return res.status(404).json({ message: "reel not found" });
+    }
+
+    const userId = req.user._id.toString();
+    if (!reel.views.includes(userId)) {
+      reel.views.push(userId);
+      await reel.save();
+    }
+
+    res.status(200).json({
+      success: true,
+      message: "Reel viewed",
+      viewsCount: reel.views.length,
+    });
+  } catch (error) {
+    console.error(error);
+    res.status(500).json({ message: "server error" });
+  }
+};
+
 module.exports = {
   createReel,
   getAllReels,
   getReelById,
   likeReel,
   commentReel,
+  viewReel,
 };

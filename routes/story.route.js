@@ -12,19 +12,16 @@ const {
 
 const router4 = Router();
 
-// Create story
-router4.post("/create", authMiddleware, upload.single("media"), createStory);
+router4.post("/story/create", authMiddleware, upload.single("media"), createStory);//ok
 
-// Get all stories
-router4.get("/", getAllStories);
+router4.get("/allstory", getAllStories);//ok
 
-// View story
-router4.put("/view/:id", authMiddleware, viewStory);
 
-// Like / unlike story
-router4.put("/like/:id", authMiddleware, likeStory);
+router4.put("/story/view/:id", authMiddleware, viewStory);//ok
 
-// Comment on story
-router4.post("/comment/:id", authMiddleware, commentStory);
+router4.put("/story/like/:id", authMiddleware, likeStory);//ok
+
+
+router4.post("/story/comment/:id", authMiddleware, commentStory);
 
 module.exports = router4;
