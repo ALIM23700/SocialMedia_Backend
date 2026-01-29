@@ -5,7 +5,8 @@ const {
   logoutUser,
   profileUser,
   allUsers,
-  uploadProfile
+ 
+  uploadProfile 
 } = require("../Controllers/user.controller");
 
 const authMiddleware = require("../Middleware/authMiddleware");
@@ -16,8 +17,9 @@ const router = Router();
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/logout", logoutUser);
-router.post("/profile", authMiddleware, profileUser);
-router.post("/updateProfile", authMiddleware, upload.single("file"), uploadProfile);
-router.post("/all", allUsers);
+router.get("/profile", authMiddleware, profileUser);
+router.post("/updateProfile", authMiddleware, upload.single("profileImage"),
+uploadProfile );
+router.get("/all", allUsers);
 
 module.exports = router;
