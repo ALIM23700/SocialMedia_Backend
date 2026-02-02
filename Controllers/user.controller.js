@@ -39,40 +39,37 @@ const registerUser = async (req, res) => {
 }
 
 const loginUser = async (req, res) => {
-  const { email, password } = req.body
+  const { email, password } = req.body;
 
   try {
     if (!email || !password)
-      return res.status(422).json({ success: false, message: "All fields are required" })
+      return res.status(422).json({ success: false, message: "All fields are required" });
 
-    const user = await User.findOne({ email })
+    const user = await User.findOne({ email });
     if (!user)
-      return res.status(400).json({ success: false, message: "Invalid credentials" })
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
 
-    const isMatch = await bcrypt.compare(password, user.password)
+    const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(400).json({ success: false, message: "Invalid credentials" })
+      return res.status(400).json({ success: false, message: "Invalid credentials" });
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" })
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
 
-    const options = {
-      httpOnly: true,
-      maxAge: 7 * 24 * 60 * 60 * 1000, 
-      secure: process.env.NODE_ENV === "production",
-      sameSite: "Strict"
-    }
+    const { password: pass, ...rest } = user._doc;
 
-    const { password: pass, ...rest } = user._doc
-
-    res.status(200)
-      .cookie("token", token, options)
-      .json({ success: true, message: "Login successful", user: rest })
+    res.status(200).json({
+      success: true,
+      message: "Login successful",
+      user: rest,
+      token, // send token in JSON
+    });
 
   } catch (error) {
-    console.error(error)
-    res.status(500).json({ success: false, message: "Error with login" })
+    console.error("Login error:", error.message);
+    res.status(500).json({ success: false, message: "Error with login" });
   }
-}
+};
+
 
 
 const logoutUser = async (req, res) => {
