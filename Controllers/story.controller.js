@@ -1,6 +1,6 @@
 const Story = require("../Models/story.model");
 
-// Create story (image / video)
+// ================= CREATE STORY =================
 const createStory = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
@@ -12,9 +12,7 @@ const createStory = async (req, res) => {
     }
 
     const mediaUrl = req.file.path;
-    const mediaType = req.file.mimetype.startsWith("video")
-      ? "video"
-      : "image";
+    const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
 
     const story = await Story.create({
       user: req.user._id,
@@ -33,12 +31,14 @@ const createStory = async (req, res) => {
   }
 };
 
-// Get all active stories
+// ================= GET ALL STORIES =================
 const getAllStories = async (req, res) => {
   try {
     const stories = await Story.find()
-      .populate("user", "username profileImage")
-      .populate("comments.user", "username profileImage")
+      .populate("user", "username profileImage") // story owner
+      .populate("comments.user", "username profileImage") // commenters
+      .populate("likes", "username profileImage") // users who liked
+      .populate("viewers", "username profileImage") // users who viewed
       .sort({ createdAt: -1 });
 
     res.status(200).json({
@@ -51,13 +51,11 @@ const getAllStories = async (req, res) => {
   }
 };
 
-// View a story
+// ================= VIEW STORY =================
 const viewStory = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
-    if (!story) {
-      return res.status(404).json({ message: "story not found" });
-    }
+    if (!story) return res.status(404).json({ message: "story not found" });
 
     const userId = req.user._id.toString();
 
@@ -66,10 +64,16 @@ const viewStory = async (req, res) => {
       await story.save();
     }
 
+    const populatedStory = await Story.findById(req.params.id).populate(
+      "viewers",
+      "username profileImage"
+    );
+
     res.status(200).json({
       success: true,
       message: "story viewed",
-      viewersCount: story.viewers.length,
+      viewers: populatedStory.viewers,
+      viewersCount: populatedStory.viewers.length,
     });
   } catch (error) {
     console.error(error);
@@ -77,16 +81,14 @@ const viewStory = async (req, res) => {
   }
 };
 
-// Like / Unlike story
+// ================= LIKE / UNLIKE STORY =================
 const likeStory = async (req, res) => {
   try {
     const story = await Story.findById(req.params.id);
-    if (!story) {
-      return res.status(404).json({ message: "story not found" });
-    }
+    if (!story) return res.status(404).json({ message: "story not found" });
 
     const userId = req.user._id.toString();
-    const index = story.likes.findIndex(id => id.toString() === userId);
+    const index = story.likes.findIndex((id) => id.toString() === userId);
 
     if (index === -1) {
       story.likes.push(userId);
@@ -96,10 +98,16 @@ const likeStory = async (req, res) => {
 
     await story.save();
 
+    const populatedStory = await Story.findById(req.params.id).populate(
+      "likes",
+      "username profileImage"
+    );
+
     res.status(200).json({
       success: true,
       message: index === -1 ? "story liked" : "story unliked",
-      likesCount: story.likes.length,
+      likes: populatedStory.likes,
+      likesCount: populatedStory.likes.length,
     });
   } catch (error) {
     console.error(error);
@@ -107,19 +115,14 @@ const likeStory = async (req, res) => {
   }
 };
 
-// Comment on story
+// ================= COMMENT ON STORY =================
 const commentStory = async (req, res) => {
   try {
     const { text } = req.body;
-
-    if (!text) {
-      return res.status(422).json({ message: "comment text is required" });
-    }
+    if (!text) return res.status(422).json({ message: "comment text is required" });
 
     const story = await Story.findById(req.params.id);
-    if (!story) {
-      return res.status(404).json({ message: "story not found" });
-    }
+    if (!story) return res.status(404).json({ message: "story not found" });
 
     story.comments.push({
       user: req.user._id,
@@ -129,8 +132,10 @@ const commentStory = async (req, res) => {
 
     await story.save();
 
-    const populatedStory = await Story.findById(req.params.id)
-      .populate("comments.user", "username profileImage");
+    const populatedStory = await Story.findById(req.params.id).populate(
+      "comments.user",
+      "username profileImage"
+    );
 
     res.status(200).json({
       success: true,
