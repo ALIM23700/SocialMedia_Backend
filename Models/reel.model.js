@@ -1,4 +1,4 @@
-const mongoose = require('mongoose');
+const mongoose = require("mongoose");
 
 const reelSchema = new mongoose.Schema({
   user: {
@@ -6,24 +6,24 @@ const reelSchema = new mongoose.Schema({
     ref: "User",
     required: true,
   },
-  mediaType: {
-    type: String,
-    enum: ["image", "video"],
-    required: true,
-  },
-  mediaUrl: {
+
+  videoUrl: { // unified field for all videos
     type: String,
     required: true,
   },
+
   caption: {
     type: String,
+    default: "",
   },
+
   likes: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    }
+    },
   ],
+
   comments: [
     {
       user: {
@@ -33,17 +33,18 @@ const reelSchema = new mongoose.Schema({
       text: String,
       createdAt: {
         type: Date,
-        default: Date.now
-      }
-    }
+        default: Date.now,
+      },
+    },
   ],
+
   views: [
     {
       type: mongoose.Schema.Types.ObjectId,
       ref: "User",
-    }
-  ]
+    },
+  ],
+
 }, { timestamps: true });
 
-const Reel = mongoose.model('Reel', reelSchema);
-module.exports = Reel;
+module.exports = mongoose.model("Reel", reelSchema);
