@@ -5,21 +5,32 @@ const {
   logoutUser,
   profileUser,
   allUsers,
- 
-  uploadProfile 
+  uploadProfile,
+  toggleFollow
+  
 } = require("../Controllers/user.controller");
 
 const authMiddleware = require("../Middleware/authMiddleware");
-const upload = require("../Middleware/cloudnaryUpload"); 
+const upload = require("../Middleware/cloudnaryUpload");
+
 
 const router = Router();
 
 router.post("/register", registerUser);
 router.post("/login", loginUser);
 router.get("/logout", logoutUser);
+
 router.get("/profile", authMiddleware, profileUser);
-router.post("/updateProfile", authMiddleware, upload.single("profileImage"),
-uploadProfile );
+router.post(
+  "/updateProfile",
+  authMiddleware,
+  upload.single("profileImage"),
+  uploadProfile
+);
+
 router.get("/all", allUsers);
+
+// Follow / Unfollow route
+router.post("/follow/:targetUserId", authMiddleware, toggleFollow);
 
 module.exports = router;
