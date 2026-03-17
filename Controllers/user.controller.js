@@ -125,10 +125,8 @@ const uploadProfile = async (req, res) => {
     if (req.body.bio) updateFields.bio = req.body.bio;
 
     const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true })
-      
       .populate("followers")
-      .populate("following")
-      
+      .populate("following");
 
     res.status(200).json({ success: true, message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
@@ -152,26 +150,24 @@ const allUsers = async (req, res) => {
 const toggleFollow = async (req, res) => {
   try {
     const userId = req.user._id;
-    const { targetId } = req.body;
+    const { targetUserId } = req.params;
 
-    if (userId.toString() === targetId) {
+    if (userId.toString() === targetUserId) {
       return res.status(400).json({ message: "Cannot follow yourself" });
     }
 
-    const targetUser = await User.findById(targetId);
+    const targetUser = await User.findById(targetUserId);
     const currentUser = await User.findById(userId);
 
     if (!targetUser) return res.status(404).json({ message: "Target user not found" });
 
     let action = "";
-    if (currentUser.following.includes(targetId)) {
-      // unfollow
-      currentUser.following.pull(targetId);
+    if (currentUser.following.includes(targetUserId)) {
+      currentUser.following.pull(targetUserId);
       targetUser.followers.pull(userId);
       action = "unfollowed";
     } else {
-      // follow
-      currentUser.following.push(targetId);
+      currentUser.following.push(targetUserId);
       targetUser.followers.push(userId);
       action = "followed";
     }
@@ -179,7 +175,8 @@ const toggleFollow = async (req, res) => {
     await currentUser.save();
     await targetUser.save();
 
-    res.status(200).json({ success: true, message: `Successfully ${action}` });
+    // ✅ updated user return
+    res.status(200).json({ success: true, message: `Successfully ${action}`, user: currentUser });
   } catch (error) {
     console.error("Follow/Unfollow error:", error.message);
     res.status(500).json({ message: "Follow/unfollow failed" });
