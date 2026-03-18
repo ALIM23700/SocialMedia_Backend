@@ -1,4 +1,5 @@
 const User = require("../Models/user.model");
+const Notification = require("../Models/notification.model"); // added for notifications
 const bcrypt = require("bcryptjs");
 const jwt = require("jsonwebtoken");
 
@@ -170,12 +171,19 @@ const toggleFollow = async (req, res) => {
       currentUser.following.push(targetUserId);
       targetUser.followers.push(userId);
       action = "followed";
+
+      // ✅ Notification logic
+      await Notification.create({
+        sender: userId,
+        receiver: targetUserId,
+        type: "follow",
+        message: "started following you"
+      });
     }
 
     await currentUser.save();
     await targetUser.save();
 
-    // ✅ updated user return
     res.status(200).json({ success: true, message: `Successfully ${action}`, user: currentUser });
   } catch (error) {
     console.error("Follow/Unfollow error:", error.message);

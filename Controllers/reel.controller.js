@@ -1,4 +1,5 @@
 const Reel = require("../Models/reel.model");
+const Notification = require("../Models/notification.model"); // added for notification
 
 // CREATE REEL
 const createReel = async (req, res) => {
@@ -66,14 +67,32 @@ const likeReel = async (req, res) => {
     const userId = req.user._id.toString();
     const index = reel.likes.findIndex(id => id.toString() === userId);
 
-    if (index === -1) reel.likes.push(userId);
-    else reel.likes.splice(index, 1);
+    let action = "";
+    if (index === -1) {
+      reel.likes.push(userId);
+      action = "like";
+
+      // Notification logic
+      if (reel.user.toString() !== userId) {
+        await Notification.create({
+          sender: userId,
+          receiver: reel.user,
+          type: "like",
+          reel: reel._id,
+          message: "liked your reel"
+        });
+      }
+
+    } else {
+      reel.likes.splice(index, 1);
+      action = "unlike";
+    }
 
     await reel.save();
 
     res.status(200).json({
       success: true,
-      message: index === -1 ? "Reel liked" : "Reel unliked",
+      message: action === "like" ? "Reel liked" : "Reel unliked",
       likesCount: reel.likes.length,
     });
   } catch (err) {
@@ -93,6 +112,18 @@ const commentReel = async (req, res) => {
 
     reel.comments.push({ user: req.user._id, text });
     await reel.save();
+
+    // Notification logic
+    const userId = req.user._id.toString();
+    if (reel.user.toString() !== userId) {
+      await Notification.create({
+        sender: userId,
+        receiver: reel.user,
+        type: "comment",
+        reel: reel._id,
+        message: "commented on your reel"
+      });
+    }
 
     const populatedReel = await Reel.findById(req.params.id)
       .populate("comments.user", "username profileImage");

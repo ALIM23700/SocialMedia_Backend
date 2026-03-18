@@ -1,4 +1,5 @@
 const Story = require("../Models/story.model");
+const Notification = require("../Models/notification.model"); // added for notification
 
 // ================= CREATE STORY =================
 const createStory = async (req, res) => {
@@ -90,10 +91,25 @@ const likeStory = async (req, res) => {
     const userId = req.user._id.toString();
     const index = story.likes.findIndex((id) => id.toString() === userId);
 
+    let action = "";
     if (index === -1) {
       story.likes.push(userId);
+      action = "like";
+
+      // Notification logic
+      if (story.user.toString() !== userId) {
+        await Notification.create({
+          sender: userId,
+          receiver: story.user,
+          type: "like",
+          story: story._id,
+          message: "liked your story"
+        });
+      }
+
     } else {
       story.likes.splice(index, 1);
+      action = "unlike";
     }
 
     await story.save();
@@ -105,7 +121,7 @@ const likeStory = async (req, res) => {
 
     res.status(200).json({
       success: true,
-      message: index === -1 ? "story liked" : "story unliked",
+      message: action === "like" ? "story liked" : "story unliked",
       likes: populatedStory.likes,
       likesCount: populatedStory.likes.length,
     });
@@ -131,6 +147,18 @@ const commentStory = async (req, res) => {
     });
 
     await story.save();
+
+    // Notification logic
+    const userId = req.user._id.toString();
+    if (story.user.toString() !== userId) {
+      await Notification.create({
+        sender: userId,
+        receiver: story.user,
+        type: "comment",
+        story: story._id,
+        message: "commented on your story"
+      });
+    }
 
     const populatedStory = await Story.findById(req.params.id).populate(
       "comments.user",

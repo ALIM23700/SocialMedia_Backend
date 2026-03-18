@@ -1,7 +1,8 @@
 const Post = require("../Models/post.model");
 const User = require("../Models/user.model");
+const Notification = require("../Models/notification.model"); 
 
-
+// Create a new post
 const createPost = async (req, res) => {
   try {
     if (!req.user || !req.user._id) {
@@ -14,20 +15,20 @@ const createPost = async (req, res) => {
       return res.status(422).json({ message: "media file is required" });
     }
 
- 
     const mediaUrl = req.file.path; 
     const mediaType = req.file.mimetype.startsWith("video") ? "video" : "image";
-    const userId=req.user._id;
+    const userId = req.user._id;
+
     const post = await Post.create({
       user: userId,
       mediaType,
       mediaUrl,
       caption: caption || "",
     });
-    const user=await User.findById(userId)
 
-    if(user){
-      user?.posts.push(post?._id);
+    const user = await User.findById(userId);
+    if (user) {
+      user.posts.push(post._id);
       await user.save();
     }
 
@@ -86,7 +87,6 @@ const updatePost = async (req, res) => {
   try {
     const caption = req.body?.caption;
 
-
     const post = await Post.findById(req.params.id);
     if (!post) {
       return res.status(404).json({ message: "post not found" });
@@ -121,17 +121,32 @@ const likePost = async (req, res) => {
     const userId = req.user._id.toString();
     const index = post.likes.findIndex(id => id.toString() === userId);
 
+    let action = "";
     if (index === -1) {
       post.likes.push(userId);
+      action = "like";
+
+      // Notification logic
+      if (post.user.toString() !== userId) { // avoid self-notification
+        await Notification.create({
+          sender: userId,
+          receiver: post.user,
+          type: "like",
+          post: post._id,
+          message: "liked your post"
+        });
+      }
+
     } else {
       post.likes.splice(index, 1);
+      action = "unlike";
     }
 
     await post.save();
 
     res.status(200).json({
       success: true,
-      message: index === -1 ? "post liked" : "post unliked",
+      message: action === "like" ? "post liked" : "post unliked",
       likesCount: post.likes.length,
     });
   } catch (error) {
@@ -156,6 +171,18 @@ const commentPost = async (req, res) => {
 
     post.comments.push({ user: req.user._id, text, createAt: new Date() });
     await post.save();
+
+    // Notification logic
+    const userId = req.user._id.toString();
+    if (post.user.toString() !== userId) { // avoid self-notification
+      await Notification.create({
+        sender: userId,
+        receiver: post.user,
+        type: "comment",
+        post: post._id,
+        message: "commented on your post"
+      });
+    }
 
     const populatedPost = await Post.findById(req.params.id)
       .populate("comments.user", "username profileImage");

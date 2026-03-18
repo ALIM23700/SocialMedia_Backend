@@ -8,6 +8,7 @@ const router2 = require("./routes/post.route")
 const router3 = require("./routes/reel.route")
 const router4 = require("./routes/story.route")
 const connectDB=require("../Backend/Models/db.model")
+const router5 = require("./routes/notification.route")
 
 
 
@@ -34,6 +35,7 @@ app.use("/api/v1/",router1)
 app.use("/api/v1/",router2)
 app.use("/api/v1/",router3)
 app.use("/api/v1/",router4)
+app.use("/api/v1/",router5)
 
 app.get("/",(req,res)=>{
     res.send("i am home page")
