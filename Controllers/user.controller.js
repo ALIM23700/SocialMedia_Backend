@@ -44,17 +44,25 @@ const loginUser = async (req, res) => {
 
   try {
     if (!email || !password)
-      return res.status(422).json({ success: false, message: "All fields are required" });
+      return res
+        .status(422)
+        .json({ success: false, message: "All fields are required" });
 
     const user = await User.findOne({ email });
     if (!user)
-      return res.status(400).json({ success: false, message: "Invalid credentials" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
 
     const isMatch = await bcrypt.compare(password, user.password);
     if (!isMatch)
-      return res.status(400).json({ success: false, message: "Invalid credentials" });
+      return res
+        .status(400)
+        .json({ success: false, message: "Invalid credentials" });
 
-    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, { expiresIn: "7d" });
+    const token = jwt.sign({ _id: user._id }, process.env.JWT_SECRET, {
+      expiresIn: "7d",
+    });
 
     const { password: pass, ...rest } = user._doc;
 
@@ -93,16 +101,28 @@ const logoutUser = async (req, res) => {
 // ================= GET PROFILE =================
 const profileUser = async (req, res) => {
   try {
-    const userId = req.user?._id;
+    const { userId } = req.params;
 
-    if (!userId) {
-      return res.status(401).json({ success: false, message: "Unauthorized access" });
+    let user;
+    if (userId) {
+      // Fetch profile of another user
+      user = await User.findById(userId)
+        .populate("followers")
+        .populate("following")
+        .select("-password");
+    } else {
+      // Fetch logged-in user profile
+      const currentUserId = req.user?._id;
+      if (!currentUserId) {
+        return res
+          .status(401)
+          .json({ success: false, message: "Unauthorized access" });
+      }
+      user = await User.findById(currentUserId)
+        .populate("followers")
+        .populate("following")
+        .select("-password");
     }
-
-    const user = await User.findById(userId)
-      .populate("followers")
-      .populate("following")
-      .select("-password");
 
     if (!user) {
       return res.status(404).json({ success: false, message: "User not found" });
@@ -125,11 +145,15 @@ const uploadProfile = async (req, res) => {
     if (req.file?.path) updateFields.profileImage = req.file.path;
     if (req.body.bio) updateFields.bio = req.body.bio;
 
-    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, { new: true })
+    const updatedUser = await User.findByIdAndUpdate(userId, updateFields, {
+      new: true,
+    })
       .populate("followers")
       .populate("following");
 
-    res.status(200).json({ success: true, message: "Profile updated successfully", user: updatedUser });
+    res
+      .status(200)
+      .json({ success: true, message: "Profile updated successfully", user: updatedUser });
   } catch (error) {
     console.error("UploadProfile Error:", error.message);
     res.status(500).json({ message: "Upload failed", error: error.message });
@@ -177,7 +201,7 @@ const toggleFollow = async (req, res) => {
         sender: userId,
         receiver: targetUserId,
         type: "follow",
-        message: "started following you"
+        message: "started following you",
       });
     }
 

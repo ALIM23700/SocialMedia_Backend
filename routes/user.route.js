@@ -6,7 +6,7 @@ const {
   profileUser,
   allUsers,
   uploadProfile,
-  toggleFollow
+  toggleFollow,
 } = require("../Controllers/user.controller");
 
 const authMiddleware = require("../Middleware/authMiddleware");
@@ -20,7 +20,8 @@ router.post("/login", loginUser);
 router.get("/logout", logoutUser);
 
 // Profile
-router.get("/profile", authMiddleware, profileUser);
+router.get("/profile", authMiddleware, profileUser); // logged-in user profile
+router.get("/users/:userId", authMiddleware, profileUser); // any user profile
 router.post("/updateProfile", authMiddleware, upload.single("profileImage"), uploadProfile);
 
 // Users
