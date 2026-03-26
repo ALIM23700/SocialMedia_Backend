@@ -1,4 +1,4 @@
-const app = require("../Backend/app");
+const app = require("./app");
 const dotenv = require("dotenv");
 const http = require("http");         
 const { Server } = require("socket.io"); 
