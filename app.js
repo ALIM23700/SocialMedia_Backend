@@ -7,7 +7,7 @@ const router1 = require("./routes/user.route")
 const router2 = require("./routes/post.route")
 const router3 = require("./routes/reel.route")
 const router4 = require("./routes/story.route")
-const connectDB=require("../Backend/Models/db.model")
+const connectDB=require("./Models/db.model")
 const router5 = require("./routes/notification.route")
 const router6 = require("./routes/message.route")
 
